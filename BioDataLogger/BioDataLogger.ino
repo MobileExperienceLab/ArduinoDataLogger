@@ -1,10 +1,15 @@
 /*BioMapping Data Logger: Mobile Experience Lab,
-Symon Oliver. Bohdan Anderson. Myles Borins. Andrei Vasili*/
+ Symon Oliver. Bohdan Anderson. Myles Borins. Andrei Vasili*/
 
+//Does not support .JSON file type as the extension violates the .123 limit of the current version
 
 /*INIT GLOBAL VARIABLES*/
 char buff[50];
-int fileNumber;
+
+int resetOpenLog = 2;
+
+int partNum = 01; //This should come from Node or Python
+String partIn; //Participant Initials
 
 int dataPin =  12; //Status LED connected to digital pin 13
 int statusPin = 9; //Indicates state of logging
@@ -30,11 +35,57 @@ void setup()
 {
   pinMode(dataPin, OUTPUT);
   pinMode(statusPin, OUTPUT);
+  pinMode(resetOpenLog, OUTPUT);
   pinMode(buttonPin, INPUT);
 
   Serial.begin(9600); //9600bps is default for OpenLog
 
+  //Reset OpenLog
+  digitalWrite(resetOpenLog, LOW);
+  delay(100);
+  digitalWrite(resetOpenLog, HIGH);
+
+  //Wait for OpenLog to respond with '<' to indicate it is alive and recording to a file
+  while(1) {
+    if(Serial.available())
+      if(Serial.read() == '<') break;
+  }
+
+  //Works with Arduino v1.0
+  Serial.write(26);
+  Serial.write(26);
+  Serial.write(26);
+
+  //Wait for OpenLog to respond with '>' to indicate we are in command mode
+  while(1) {
+    if(Serial.available())
+      if(Serial.read() == '>') break;
+  }
+
+  //Old way
+  sprintf(buff, "new bio.txt\r");
+  Serial.print(buff); //\r in string + regular print works with older v2.5 Openlogs
+
+  //Wait for OpenLog to return to waiting for a command
+  while(1) {
+    if(Serial.available())
+      if(Serial.read() == '>') break;
+  }
+
+  sprintf(buff, "append bio.txt\r");
+  Serial.print(buff);
+
+  //Wait for OpenLog to indicate file is open and ready for writing
+  while(1) {
+    if(Serial.available())
+      if(Serial.read() == '<') break;
+  }
+
+  digitalWrite(resetOpenLog, LOW);
+
   delay(2000); //Wait a second for OpenLog to init
+
+  digitalWrite(resetOpenLog, HIGH);
 
   Serial.println();
 
@@ -44,19 +95,18 @@ void setup()
   Serial.print('"');
   Serial.print(":");
   Serial.print(cbOpen);
+
+  digitalWrite(resetOpenLog, LOW);
 }
 
 void loop()
 { 
-
   delay(500);
 
   if(digitalRead(dataPin) == 0) //Turn the status LED on/off as we go
     digitalWrite(dataPin, HIGH);
   else
     digitalWrite(dataPin, LOW);
-
-  entryNum ++;
 
   // read the value from the sensor:
   sensorVal = analogRead(sensorPin); 
@@ -80,6 +130,9 @@ void loop()
     digitalWrite(dataPin, LOW);
 
   delay(500);
+  
+    entryNum ++;
+    
 
   buttonState = digitalRead(buttonPin);
   // check if the pushbutton is pressed.
@@ -124,3 +177,6 @@ void loop()
     } 
   }
 }
+
+
+
