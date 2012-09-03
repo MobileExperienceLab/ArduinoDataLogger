@@ -1,4 +1,5 @@
-/*BioMapping Data Logger: Mobile Experience Lab, Symon Oliver*/
+/*BioMapping Data Logger: Mobile Experience Lab,
+Symon Oliver. Bohdan Anderson. Myles Borins. Andrei Vasili*/
 
 
 /*INIT GLOBAL VARIABLES*/
