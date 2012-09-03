@@ -1,0 +1,3 @@
+//Biomapping Data Logger (TEMPORARY)
+
+Arduino Pro Mini connected to I2C devices. Data will be logged through OpenLog onto MicroSD card.
