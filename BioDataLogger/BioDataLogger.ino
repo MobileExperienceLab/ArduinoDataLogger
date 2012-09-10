@@ -11,12 +11,14 @@ int resetOpenLog = 2;
 int partNum = 01; //This should come from Node or Python
 String partIn; //Participant Initials
 
-int dataPin =  12; //Status LED connected to digital pin 13
-int statusPin = 9; //Indicates state of logging
+int dataPin =  A3; //Status LED connected to digital pin A3
+int statusPin = 3; //Indicates state of logging
 int bright = 0;    // how bright the LED is
 int fade = 2;    // how many points to fade the LED by
 int buttonState = 0;
 int entryNum = 0;
+
+const int buttonPin = 9;     // the number of the pushbutton pin
 
 String cbOpen = "{";
 String cbClose = "}";
@@ -25,7 +27,6 @@ int sensorVal;
 
 int sensorPin = A0;    // select the input pin for the potentiometer
 
-const int buttonPin = 6;     // the number of the pushbutton pin
 
 boolean complete = false;
 
@@ -40,48 +41,6 @@ void setup()
 
   Serial.begin(9600); //9600bps is default for OpenLog
 
-  //Reset OpenLog
-  digitalWrite(resetOpenLog, LOW);
-  delay(100);
-  digitalWrite(resetOpenLog, HIGH);
-
-  //Wait for OpenLog to respond with '<' to indicate it is alive and recording to a file
-  while(1) {
-    if(Serial.available())
-      if(Serial.read() == '<') break;
-  }
-
-  //Works with Arduino v1.0
-  Serial.write(26);
-  Serial.write(26);
-  Serial.write(26);
-
-  //Wait for OpenLog to respond with '>' to indicate we are in command mode
-  while(1) {
-    if(Serial.available())
-      if(Serial.read() == '>') break;
-  }
-
-  //Old way
-  sprintf(buff, "new bio.txt\r");
-  Serial.print(buff); //\r in string + regular print works with older v2.5 Openlogs
-
-  //Wait for OpenLog to return to waiting for a command
-  while(1) {
-    if(Serial.available())
-      if(Serial.read() == '>') break;
-  }
-
-  sprintf(buff, "append bio.txt\r");
-  Serial.print(buff);
-
-  //Wait for OpenLog to indicate file is open and ready for writing
-  while(1) {
-    if(Serial.available())
-      if(Serial.read() == '<') break;
-  }
-
-  digitalWrite(resetOpenLog, LOW);
 
   delay(2000); //Wait a second for OpenLog to init
 
@@ -139,7 +98,7 @@ void loop()
   // if it is, the buttonState is HIGH:
   if (buttonState == HIGH) {
 
-    digitalWrite(dataPin, LOW);
+    digitalWrite(dataPin, HIGH);
 
     complete = true;
 
